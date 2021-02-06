@@ -1,51 +1,45 @@
-import math
-G = 6.67 * (10**(-17))
-class vector3D:
-    vect = [0, 0, 0]
-    def __init__(self, vect):
-        if list == type(vect):
-            self.vect = vect
-        else:
-            print("!!!WARNING!!!", vect, "isn't a vector (it must be list). The default null vector is taken as the value")
-    def __add__(self, vect2):
-        vector_rezult = [None, None, None]
-        vector_rezult[0] = self.vect[0] + vect2.vect[0]
-        vector_rezult[1] = self.vect[1] + vect2.vect[1]
-        vector_rezult[2] = self.vect[2] + vect2.vect[2]
-        return vector3D(vector_rezult)
-    def __sub__(self, vect2):
-        vector_rezult = [None, None, None]
-        vector_rezult[0] = self.vect[0] - vect2.vect[0]
-        vector_rezult[1] = self.vect[1] - vect2.vect[1]
-        vector_rezult[2] = self.vect[2] - vect2.vect[2]
-        return vector3D(vector_rezult)
-    def __mul__(self, chislo):
-        vector_rezult = [None, None, None]
-        vector_rezult[0] = self.vect[0] * chislo
-        vector_rezult[1] = self.vect[1] * chislo
-        vector_rezult[2] = self.vect[2] * chislo
-        return vector3D(vector_rezult)
-    def __truediv__(self, chislo):
-        vector_rezult = [None, None, None]
-        vector_rezult[0] = self.vect[0] / chislo
-        vector_rezult[1] = self.vect[1] / chislo
-        vector_rezult[2] = self.vect[2] / chislo
-        return vector3D(vector_rezult)
-    
-    def leng(self):
-        rezult = math.sqrt(self.vect[0]**2 + self.vect[1]**2 + self.vect[2]**2)
-        return rezult
-    
-def gravity(m1, m2, coord1, coord2):
-    R = coord2 - coord1
-    r = R.leng()
-    F = (m1 * m2 * G)/(r**3)
-    F = R*F
-    return F
-def delta_V(m, V, F, timeFPS):
-    a = F / m
-    V = V + a * timeFPS
+import numpy as np
+
+global G
+G = 6.6743015 * 10**(-11)
+
+len_vector_points = lambda x, y: np.sqrt(np.sum((y - x)**2))
+len_vector = lambda x: np.sqrt(np.sum((x)**2))
+F_Gravity = lambda m1, m2, r: (G * m1 * m2 * r)/(len_vector(r)**3)  # эти 3 функции точно работают правильно.
+
+class point:
+    def __init__(self, m, coord, V, name):
+        self.m = m
+        self.V = np.array(V)
+        self.coord = np.array(coord)
+        self.point_name = name
+    def infa_point(self):
+        print("точка", self.point_name + ":")
+        print("    m =", self.m)
+        print("    coord =", self.coord)
+        print("    V =", self.V)
+        print("-----------------------------")
+
+class sphere(point):
+    def __init__(self, R, m, coord, V, name):
+        super().__init__(m, coord, V, "point_" + name)
+        self.R = R
+        self.sphere_name = name
+    def infa_sphere(self):
+        print("сфера", self.sphere_name + ":")
+        print("  R =", self.R)
+        self.infa_point()
+        print("---------------------------------")
+    def point_in_sphere(self, Point):
+        r = len_vector_points(Point.coord, self.coord)
+        print(r)
+        return r <= self.R
+
+def delta_V(V, F, m, FPStime):
+    a = F/m
+    V = V + a * FPStime
     return V
-def delta_coord(coord, V, timeFPS):
-    new_coord = coord + V * timeFPS
-    return new_coord
+
+def delta_coord(coord, V, FPStime):
+    coord = coord + V*FPStime
+    return coord
